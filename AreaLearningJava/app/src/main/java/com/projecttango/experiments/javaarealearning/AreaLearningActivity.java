@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -45,8 +46,15 @@ import com.projecttango.tangoutils.TangoPoseUtilities;
 import org.rajawali3d.surface.IRajawaliSurface;
 import org.rajawali3d.surface.RajawaliSurfaceView;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Main Activity class for the Area Learning API Sample. Handles the connection to the Tango service
@@ -118,6 +126,8 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
 
     private final Object mSharedLock = new Object();
 
+    private String mFile="";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,6 +144,13 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
 
         // Configure OpenGL renderer
         mRenderer = setupGLViewAndRenderer();
+
+
+        File dir=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/ALJava");
+        if(!dir.exists()) {
+            dir.mkdir();
+        }
+        mFile=dir.getAbsolutePath() + "/" + generateFileName() + ".txt";
 
     }
 
@@ -238,6 +255,43 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
     public boolean onTouchEvent(MotionEvent event) {
         mRenderer.onTouchEvent(event);
         return true;
+    }
+
+    public static String generateFileName() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd__HH_mm_ss");
+        Date date = new Date();
+        String datestr=dateFormat.format(date);
+        return datestr;
+    }
+
+    public void appendLog(String text)
+    {
+        File logFile = new File(mFile);
+        if (!logFile.exists())
+        {
+            try
+            {
+                logFile.createNewFile();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        try
+        {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            buf.append(text);
+            buf.newLine();
+            buf.close();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -428,6 +482,11 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
                         mAdf2DevicePoseDelta = (pose.timestamp - mAdf2DevicePreviousPoseTimeStamp)
                                 * SECS_TO_MILLISECS;
                         mAdf2DevicePreviousPoseTimeStamp = pose.timestamp;
+
+                        String logMsg = "AD_FD" + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
+                        Log.i(TAG, "AD_FD" + logMsg);
+                        appendLog(logMsg);
+
                         if (mIsRelocalized) {
                             updateRenderer = true;
                         }
@@ -445,6 +504,11 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
                         mStart2DevicePoseDelta = (pose.timestamp - mStart2DevicePreviousPoseTimeStamp)
                                 * SECS_TO_MILLISECS;
                         mStart2DevicePreviousPoseTimeStamp = pose.timestamp;
+
+                        String logMsg = "SS_FD" + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
+                        Log.i(TAG, "SS_FD" + logMsg);
+                        appendLog(logMsg);
+
                         if (!mIsRelocalized) {
                             updateRenderer = true;
                         }
@@ -463,6 +527,11 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
                         mAdf2StartPoseDelta = (pose.timestamp - mAdf2StartPreviousPoseTimeStamp)
                                 * SECS_TO_MILLISECS;
                         mAdf2StartPreviousPoseTimeStamp = pose.timestamp;
+
+                        String logMsg = "AD_SS" + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
+                        Log.i(TAG, "AD_SS" + logMsg);
+                        appendLog(logMsg);
+
                         if (pose.statusCode == TangoPoseData.POSE_VALID) {
                             mIsRelocalized = true;
                             // Set the color to green

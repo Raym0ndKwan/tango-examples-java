@@ -159,7 +159,6 @@ public class MainActivity extends Activity {
         return datestr;
     }
 
-
     public void appendLog(String text)
     {
         File logFile = new File(mFile);
