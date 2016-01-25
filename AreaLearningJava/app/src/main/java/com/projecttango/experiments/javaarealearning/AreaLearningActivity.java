@@ -461,6 +461,7 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
             @Override
             public void onPoseAvailable(TangoPoseData pose) {
                 boolean updateRenderer = false;
+                String logMsg = null ;
                 // Make sure to have atomic access to Tango Data so that
                 // UI loop doesn't interfere while Pose call back is updating
                 // the data.
@@ -483,9 +484,9 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
                                 * SECS_TO_MILLISECS;
                         mAdf2DevicePreviousPoseTimeStamp = pose.timestamp;
 
-                        String logMsg = "AD_FD" + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
+                        logMsg = "AD_FD" + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
                         Log.i(TAG, "AD_FD" + logMsg);
-                        appendLog(logMsg);
+
 
                         if (mIsRelocalized) {
                             updateRenderer = true;
@@ -505,9 +506,9 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
                                 * SECS_TO_MILLISECS;
                         mStart2DevicePreviousPoseTimeStamp = pose.timestamp;
 
-                        String logMsg = "SS_FD" + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
+                        logMsg = "SS_FD" + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
                         Log.i(TAG, "SS_FD" + logMsg);
-                        appendLog(logMsg);
+
 
                         if (!mIsRelocalized) {
                             updateRenderer = true;
@@ -528,9 +529,8 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
                                 * SECS_TO_MILLISECS;
                         mAdf2StartPreviousPoseTimeStamp = pose.timestamp;
 
-                        String logMsg = "AD_SS" + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
+                        logMsg = "AD_SS" + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
                         Log.i(TAG, "AD_SS" + logMsg);
-                        appendLog(logMsg);
 
                         if (pose.statusCode == TangoPoseData.POSE_VALID) {
                             mIsRelocalized = true;
@@ -540,6 +540,7 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
                             // Set the color blue
                         }
                     }
+                    appendLog(logMsg);
                 }
 
                 final double deltaTime = (pose.timestamp - mPreviousPoseTimeStamp) * SECS_TO_MILLISECS;
