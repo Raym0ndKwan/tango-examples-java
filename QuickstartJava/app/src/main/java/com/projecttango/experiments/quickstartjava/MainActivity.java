@@ -53,7 +53,7 @@ import java.util.Date;
  * {@link TangoConfig}.
  */
 public class MainActivity extends Activity {
-    private static final String TAG = "Log";
+    private static final String TAG = MainActivity.class.getSimpleName();
     private static final String sTimestamp = "Timestamp: %f";
     private static final String sTranslationFormat = "Translation: %f, %f, %f";
     private static final String sRotationFormat = "Rotation: %f, %f, %f, %f";
@@ -213,7 +213,7 @@ public class MainActivity extends Activity {
                 // Output to LogCat
                 //String logMsg = pose.timestamp + "|" + translationMsg + " | " + rotationMsg;
                 String logMsg = pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
-                Log.i(TAG, logMsg);
+                Log.i("Log", logMsg);
                 appendLog(logMsg);
 
                 final double deltaTime = (pose.timestamp - mPreviousTimeStamp)

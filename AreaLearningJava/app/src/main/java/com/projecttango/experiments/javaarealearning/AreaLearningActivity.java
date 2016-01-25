@@ -484,8 +484,7 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
                                 * SECS_TO_MILLISECS;
                         mAdf2DevicePreviousPoseTimeStamp = pose.timestamp;
 
-                        logMsg = "AD_FD" + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
-                        Log.i(TAG, "AD_FD" + logMsg);
+                        logMsg = "AD_FD" + "," + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
 
 
                         if (mIsRelocalized) {
@@ -506,8 +505,7 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
                                 * SECS_TO_MILLISECS;
                         mStart2DevicePreviousPoseTimeStamp = pose.timestamp;
 
-                        logMsg = "SS_FD" + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
-                        Log.i(TAG, "SS_FD" + logMsg);
+                        logMsg = "SS_FD"+ "," + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
 
 
                         if (!mIsRelocalized) {
@@ -530,7 +528,7 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
                         mAdf2StartPreviousPoseTimeStamp = pose.timestamp;
 
                         logMsg = "AD_SS" + pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
-                        Log.i(TAG, "AD_SS" + logMsg);
+
 
                         if (pose.statusCode == TangoPoseData.POSE_VALID) {
                             mIsRelocalized = true;
@@ -540,6 +538,7 @@ public class AreaLearningActivity extends Activity implements View.OnClickListen
                             // Set the color blue
                         }
                     }
+                    Log.d("Log",logMsg);
                     appendLog(logMsg);
                 }
 
