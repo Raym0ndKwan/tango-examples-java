@@ -31,11 +31,20 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Main Activity for the Tango Java Quickstart. Demonstrates establishing a
@@ -44,12 +53,13 @@ import java.util.ArrayList;
  * {@link TangoConfig}.
  */
 public class MainActivity extends Activity {
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = "Log";
+    private static final String sTimestamp = "Timestamp: %f";
     private static final String sTranslationFormat = "Translation: %f, %f, %f";
     private static final String sRotationFormat = "Rotation: %f, %f, %f, %f";
 
     private static final int SECS_TO_MILLISECS = 1000;
-    private static final double UPDATE_INTERVAL_MS = 100.0;
+    private static final double UPDATE_INTERVAL_MS = 100.0;//was 100
 
     private double mPreviousTimeStamp;
     private double mTimeToNextUpdate = UPDATE_INTERVAL_MS;
@@ -61,10 +71,20 @@ public class MainActivity extends Activity {
     private TangoConfig mConfig;
     private boolean mIsTangoServiceConnected;
 
+    private String mFile="";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        File dir=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/QuickstartJava");
+        if(!dir.exists()) {
+            dir.mkdir();
+        }
+        mFile=dir.getAbsolutePath() + "/" + generateFileName() + ".txt";
+
 
         mTranslationTextView = (TextView) findViewById(R.id.translation_text_view);
         mRotationTextView = (TextView) findViewById(R.id.rotation_text_view);
@@ -77,6 +97,9 @@ public class MainActivity extends Activity {
         // like: mConfig.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true)
         mConfig = mTango.getConfig(TangoConfig.CONFIG_TYPE_CURRENT);
         mConfig.putBoolean(TangoConfig.KEY_BOOLEAN_MOTIONTRACKING, true);
+
+        // For auto-recovery, but this is true by default, so...
+        mConfig.putBoolean(TangoConfig.KEY_BOOLEAN_AUTORECOVERY,true);
 
     }
 
@@ -129,6 +152,44 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
+    public static String generateFileName() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd__HH_mm_ss");
+        Date date = new Date();
+        String datestr=dateFormat.format(date);
+        return datestr;
+    }
+
+
+    public void appendLog(String text)
+    {
+        File logFile = new File(mFile);
+        if (!logFile.exists())
+        {
+            try
+            {
+                logFile.createNewFile();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        try
+        {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            buf.append(text);
+            buf.newLine();
+            buf.close();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
     private void setTangoListeners() {
         // Select coordinate frame pairs
         ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<TangoCoordinateFramePair>();
@@ -151,8 +212,10 @@ public class MainActivity extends Activity {
                         pose.rotation[3]);
 
                 // Output to LogCat
-                String logMsg = translationMsg + " | " + rotationMsg;
+                //String logMsg = pose.timestamp + "|" + translationMsg + " | " + rotationMsg;
+                String logMsg = pose.timestamp + "," + pose.translation[0] + "," + pose.translation[1];
                 Log.i(TAG, logMsg);
+                appendLog(logMsg);
 
                 final double deltaTime = (pose.timestamp - mPreviousTimeStamp)
                         * SECS_TO_MILLISECS;
